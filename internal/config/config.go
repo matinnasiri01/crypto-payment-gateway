@@ -21,7 +21,7 @@ type Config struct {
 
 
 func Load() *Config {
-	doOnce.Do(func() {
+	doOnce.Do( func() {
 		var err error = godotenv.Load()
 		
 		if err != nil {

@@ -3,12 +3,10 @@ package main
 import (
 	"log"
 
-
-
 	"crypto-payment-gateway/internal/config"
 	"crypto-payment-gateway/internal/database"
-	
-	"github.com/gin-gonic/gin"
+	"crypto-payment-gateway/internal/server"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -29,18 +27,10 @@ func main() {
 
 	defer pool.Close()
 
-	var router *gin.Engine = gin.Default()
-	router.SetTrustedProxies(nil)
-
 	
-	router.GET("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message":  "CPG API is running well!",
-			"status":   "success",
-			"database": "connected",
-		})
-	})
 
-	router.Run(":" + cfg.Port)
+
+	server := server.NewServer(pool,cfg)
+	server.Run()
 	
 }
