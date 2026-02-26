@@ -5,6 +5,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"crypto-payment-gateway/internal/config"
+	usre "crypto-payment-gateway/internal/user/http"
+
 
 
 )
@@ -42,7 +44,7 @@ func (s Server) Run() error {
 
 
 func (s Server) MapRoutes() error {
-	_ = s.eng.Group("/api/v1")
-	
+	v1 := s.eng.Group("/api/v1")
+	usre.Route(v1,s.db)
 	return nil
 }
