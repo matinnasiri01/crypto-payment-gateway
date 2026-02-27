@@ -6,19 +6,19 @@ import (
 
 	"net/http"
 	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
 )
 
-
 type RegisterRequest struct {
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required,min=6"`
-	Wallet string `json:"wallet" binding:"required"`
+	Wallet   string `json:"wallet" binding:"required"`
 }
 
-func RegisterHandler(pool *pgxpool.Pool) gin.HandlerFunc{
+func RegisterHandler(pool *pgxpool.Pool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		var registerRequest RegisterRequest
@@ -33,7 +33,6 @@ func RegisterHandler(pool *pgxpool.Pool) gin.HandlerFunc{
 		}
 
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(registerRequest.Password), bcrypt.DefaultCost)
-
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password " + err.Error()})
 			return
@@ -42,10 +41,10 @@ func RegisterHandler(pool *pgxpool.Pool) gin.HandlerFunc{
 		user := &models.User{
 			Email:    registerRequest.Email,
 			Password: string(hashedPassword),
-			Wallet: registerRequest.Wallet,
+			Wallet:   registerRequest.Wallet,
 		}
 
-		reatedUser, err := repository.CreateUser(pool, user)
+		err = repository.CreateUser(pool, user)
 
 		if err != nil {
 			if strings.Contains(err.Error(), "duplicate") || strings.Contains(err.Error(), "unique") {
@@ -57,7 +56,7 @@ func RegisterHandler(pool *pgxpool.Pool) gin.HandlerFunc{
 			return
 		}
 
-		c.JSON(http.StatusCreated, gin.H{"Done": reatedUser})
-		
+		c.JSON(http.StatusCreated, gin.H{"Status": "Created!", "message": "Login to get token!"})
+
 	}
 }

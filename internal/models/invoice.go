@@ -19,7 +19,7 @@ type Invoice struct {
 	CreatorID string    `json:"creatorid"`
 	Address   string    `json:"address"`
 	Amount    float32   `json:"amount"`
-	Currency  Cu        `json:"currency"`
+	//Currency  Cu        `json:"currency"`
 	Status    Status    `json:"status"`
 	CreatedAt time.Time `json:"created_at"`
 }
