@@ -1,26 +1,25 @@
 package server
 
 import (
-	"log"
-	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"crypto-payment-gateway/internal/config"
 	usre "crypto-payment-gateway/internal/user/http"
+	"log"
 
-
-
+	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
+
 type Server struct {
-	eng  *gin.Engine
-	cfg  *config.Config
-	db   *pgxpool.Pool
+	eng *gin.Engine
+	cfg *config.Config
+	db  *pgxpool.Pool
 }
 
-func NewServer (db   *pgxpool.Pool,cfg  *config.Config) *Server{
-	return &Server{ 
+func NewServer(db *pgxpool.Pool, cfg *config.Config) *Server {
+	return &Server{
 		eng: gin.Default(),
 		cfg: cfg,
-		db: db,
+		db:  db,
 	}
 }
 
@@ -34,17 +33,21 @@ func (s Server) Run() error {
 			"database": "connected",
 		})
 	})
+	s.eng.LoadHTMLGlob("internal/templates/*")
+	s.eng.GET("/", func(c *gin.Context) {
+		c.HTML(200, "index.html", gin.H{"Status": "Load", "message": "Load From Stat"})
+	})
 	if err := s.MapRoutes(); err != nil {
 		log.Fatalf("MapRoutes Error: %v", err)
 	}
 	s.eng.Run(":" + s.cfg.Port)
 
 	return nil
-} 
-
+}
 
 func (s Server) MapRoutes() error {
+
 	v1 := s.eng.Group("/api/v1")
-	usre.Route(v1,s.db)
+	usre.Route(v1, s.db)
 	return nil
 }

@@ -12,6 +12,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// auth/register
+
 type RegisterRequest struct {
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required,min=6"`
@@ -57,6 +59,39 @@ func RegisterHandler(pool *pgxpool.Pool) gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusCreated, gin.H{"Status": "Created!", "message": "Login to get token!"})
+
+	}
+}
+
+// auth/login
+
+type LoginRequest struct {
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required,min=6"`
+}
+
+func LoginHandler(pool *pgxpool.Pool) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var loginRequest LoginRequest
+
+		if err := c.BindJSON(&loginRequest); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		user, err := repository.GetUserByEmail(pool, loginRequest.Email)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Invalid credentials"})
+			return
+		}
+
+		err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginRequest.Password))
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+			return
+		}
+
+		c.JSON(http.StatusAccepted, gin.H{"status": "Login Sucsess Full!"})
 
 	}
 }
