@@ -9,6 +9,13 @@ build:
 	
 	@go build -o main.exe cmd/api/main.go
 
+
+migrate-up:
+	migrate -path ./migrations -database "$(DATABASE_URL)" up
+
+migrate-down:
+	migrate -path ./migrations -database "$(DATABASE_URL)" down
+
 # Run the application
 run:
 	@go run cmd/api/main.go
@@ -46,4 +53,4 @@ watch:
 		Write-Output 'Watching...'; \
 	}"
 
-.PHONY: all build run test clean watch docker-run docker-down itest
+.PHONY: all build run test clean watch docker-run docker-down itest migrate-up migrate-down
