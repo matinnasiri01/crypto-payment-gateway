@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
     email            VARCHAR(255) NOT NULL UNIQUE,
     password_hash    TEXT         NOT NULL,
     withdraw_address TEXT         NOT NULL,
+    balance          NUMERIC(36,18) NOT NULL DEFAULT 0,
     created_at       TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
     updated_at       TIMESTAMPTZ  NOT NULL DEFAULT NOW()
     );
