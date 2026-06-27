@@ -4,6 +4,8 @@ import (
 	"context"
 	"crypto-payment-gateway/pkg/password"
 	"fmt"
+
+	"github.com/google/uuid"
 )
 
 type Service struct {
@@ -12,7 +14,7 @@ type Service struct {
 
 var (
 	ErrEmailAlreadyExists = fmt.Errorf("email exists")
-	ErrEmailNotExists     = fmt.Errorf("email not exists")
+	ErrUserNotExists      = fmt.Errorf("user not exists")
 
 	ErrWrongPassword   = fmt.Errorf("wrong password")
 	ErrPasswordHashing = fmt.Errorf("problem with password encryption")
@@ -60,7 +62,7 @@ func (ser Service) Login(req *LoginRequest) (*User, error) {
 		return nil, err
 	}
 	if ur == nil {
-		return nil, ErrEmailNotExists
+		return nil, ErrUserNotExists
 	}
 
 	if verify := password.Verify(ur.PasswordHash, req.Password); !verify {
@@ -74,6 +76,17 @@ func (ser Service) Update(req *LoginRequest) error {
 	return nil
 }
 
-func (ser Service) GetByID(ID string) (*MeResponse, error) {
-	return nil, nil
+func (ser Service) GetByID(ID uuid.UUID) (*MeResponse, error) {
+
+	ctx := context.Background()
+
+	ur, err := ser.repo.GetByID(ctx, ID.String())
+	if err != nil {
+		return nil, err
+	}
+	if ur == nil {
+		return nil, ErrUserNotExists
+	}
+
+	return ur.Convert(), nil
 }

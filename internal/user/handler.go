@@ -89,7 +89,26 @@ func (h *Handler) Login(c *gin.Context) {
 }
 
 func (h *Handler) GetMe(c *gin.Context) {
-	c.JSON(http.StatusOK, MeResponse{})
+
+	token, err := c.Cookie("Authorization")
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, response.Error("first /login"))
+		return
+	}
+
+	id, jErr := h.jwt.Parse(token)
+	if jErr != nil {
+		c.JSON(http.StatusInternalServerError, response.Error("internal error"))
+		return
+	}
+
+	me, sErr := h.userService.GetByID(id.UserID)
+	if sErr != nil {
+		c.JSON(http.StatusNotFound, response.Error(sErr.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, me)
 }
 
 func (h *Handler) UpdateMe(c *gin.Context) {

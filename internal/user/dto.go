@@ -17,3 +17,13 @@ type MeResponse struct {
 	Wallet  string `json:"wallet"`
 	Balance string `json:"balance"`
 }
+
+func (user *User) Convert() *MeResponse {
+
+	return &MeResponse{
+		ID:      user.ID.String(),
+		Email:   user.Email,
+		Wallet:  user.WithdrawAddress,
+		Balance: user.Balance.String(),
+	}
+}
