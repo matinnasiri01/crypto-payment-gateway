@@ -12,7 +12,10 @@ type Service struct {
 
 var (
 	ErrEmailAlreadyExists = fmt.Errorf("email exists")
-	ErrPasswordHashing    = fmt.Errorf("problem with password encryption")
+	ErrEmailNotExists     = fmt.Errorf("email not exists")
+
+	ErrWrongPassword   = fmt.Errorf("wrong password")
+	ErrPasswordHashing = fmt.Errorf("problem with password encryption")
 )
 
 func NewService(r Repository) *Service {
@@ -21,7 +24,7 @@ func NewService(r Repository) *Service {
 	}
 }
 
-func (ser Service) SignUp(req *SignupRequest) error {
+func (ser Service) Signup(req *SignupRequest) error {
 	ctx := context.Background()
 
 	ur, err := ser.repo.GetByEmail(ctx, req.Email)
@@ -48,14 +51,29 @@ func (ser Service) SignUp(req *SignupRequest) error {
 	return ser.repo.Create(ctx, user)
 }
 
-func (ser Service) LogIn(req *LoginRequest) error {
-	return nil
+func (ser Service) Login(req *LoginRequest) (*User, error) {
+
+	ctx := context.Background()
+
+	ur, err := ser.repo.GetByEmail(ctx, req.Email)
+	if err != nil {
+		return nil, err
+	}
+	if ur == nil {
+		return nil, ErrEmailNotExists
+	}
+
+	if verify := password.Verify(ur.PasswordHash, req.Password); !verify {
+		return nil, ErrWrongPassword
+	}
+
+	return ur, nil
 }
 
 func (ser Service) Update(req *LoginRequest) error {
 	return nil
 }
 
-func (ser Service) GetUserByID(ID string) (*MeResponse, error) {
+func (ser Service) GetByID(ID string) (*MeResponse, error) {
 	return nil, nil
 }

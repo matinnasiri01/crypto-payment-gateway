@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto-payment-gateway/internal/user"
 	"crypto-payment-gateway/pkg/database"
+	"crypto-payment-gateway/pkg/jwt"
 	"fmt"
 	"net/http"
 	"os"
@@ -25,9 +26,11 @@ func main() {
 		fmt.Print("can`t connect to db")
 	}
 
+	jwtManager := jwt.New(os.Getenv("JWT_SECRET"))
+
 	ur := user.NewPostgresRepo(pool.Pool)
 	us := user.NewService(ur)
-	uh := user.NewHandler(us)
+	uh := user.NewHandler(us, jwtManager)
 
 	r := gin.Default()
 
