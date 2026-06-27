@@ -15,8 +15,6 @@ func NewPostgresDB(ctx context.Context, url string) (*PostgresDB, error) {
 	if err != nil {
 
 	}
-	defer pool.Close()
-
 	err = pool.Ping(ctx)
 	if err != nil {
 		pool.Close()

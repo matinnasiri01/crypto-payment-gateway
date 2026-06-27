@@ -1,6 +1,7 @@
 package user
 
 import (
+	"crypto-payment-gateway/pkg/response"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -31,10 +32,28 @@ func (h *Handler) Register(rg *gin.RouterGroup) {
 
 func (h *Handler) Signup(c *gin.Context) {
 
+	var sr SignupRequest
+	if err := c.ShouldBindJSON(&sr); err != nil {
+		c.JSON(http.StatusBadRequest,
+			response.Error(err.Error()))
+		return
+	}
+
+	// todo: Check Wallet Address:
+
+	e := h.userService.SignUp(&sr)
+	if e != nil {
+		c.JSON(http.StatusCreated, response.Error(e.Error()))
+		return
+	}
+
+	c.JSON(http.StatusCreated, response.Success("User created, use /login"))
 }
+
 func (h *Handler) Login(c *gin.Context) {
 
 }
+
 func (h *Handler) GetMe(c *gin.Context) {
 	c.JSON(http.StatusOK, MeResponse{})
 }

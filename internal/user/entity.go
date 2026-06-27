@@ -16,3 +16,11 @@ type User struct {
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 }
+
+func (u *User) BeforeCreate() {
+	now := time.Now().UTC()
+
+	u.ID = uuid.New()
+	u.CreatedAt = now
+	u.UpdatedAt = now
+}
