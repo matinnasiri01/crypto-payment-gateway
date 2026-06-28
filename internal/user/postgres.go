@@ -57,9 +57,32 @@ func (r *userPostgresRepo) Create(ctx context.Context, user *User) error {
 	return nil
 }
 
-func (r *userPostgresRepo) Update(cnx context.Context, user *User) error {
+func (r *userPostgresRepo) Update(ctx context.Context, user *User) error {
+
+	query := `
+	UPDATE users
+	SET
+		email = @email,
+		withdraw_address = @withdraw_address,
+		updated_at = NOW()
+	WHERE id = @id;
+	`
+
+	args := pgx.NamedArgs{
+		"id":               user.ID,
+		"email":            user.Email,
+		"withdraw_address": user.WithdrawAddress,
+	}
+
+	_, err := r.pool.Exec(ctx, query, args)
+	if err != nil {
+		return err
+	}
+
 	return nil
+
 }
+
 func (r *userPostgresRepo) GetByID(cnx context.Context, id string) (*User, error) {
 	var user User
 

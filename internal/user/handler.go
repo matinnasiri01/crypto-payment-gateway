@@ -1,6 +1,7 @@
 package user
 
 import (
+	"crypto-payment-gateway/internal/middleware"
 	"crypto-payment-gateway/pkg/jwt"
 	"crypto-payment-gateway/pkg/response"
 	"net/http"
@@ -20,14 +21,17 @@ func NewHandler(us *Service, j *jwt.Manager) *Handler {
 	}
 }
 
-func (h *Handler) Register(rg *gin.RouterGroup) {
+func (h *Handler) Register(rg *gin.RouterGroup, auth *middleware.Auth) {
 
 	authGroup := rg.Group("/auth")
 	{
+		authGroup.Use(auth.GuestOnly())
 		authGroup.POST("/signup", h.Signup)
 		authGroup.POST("/login", h.Login)
 	}
 
+	rg.Use(auth.Handler())
+	rg.POST("/auth/loguot", h.Logout)
 	rg.GET("/me", h.GetMe)
 	rg.PATCH("/me", h.UpdateMe)
 
@@ -42,9 +46,9 @@ func (h *Handler) Signup(c *gin.Context) {
 		return
 	}
 
-	// todo: Check Wallet Address:
+	// todo: Check Wallet Address
 
-	e := h.userService.Signup(&sr)
+	e := h.userService.Signup(c.Request.Context(), &sr)
 	if e != nil {
 		c.JSON(http.StatusCreated, response.Error(e.Error()))
 		return
@@ -62,7 +66,7 @@ func (h *Handler) Login(c *gin.Context) {
 		return
 	}
 
-	user, serr := h.userService.Login(&lr)
+	user, serr := h.userService.Login(c.Request.Context(), &lr)
 	if serr != nil {
 		c.JSON(http.StatusBadRequest, response.Error(serr.Error()))
 		return
@@ -76,7 +80,7 @@ func (h *Handler) Login(c *gin.Context) {
 
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie(
-		"Authorization",
+		"access_token",
 		token,
 		86400,
 		"/",
@@ -88,21 +92,21 @@ func (h *Handler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, response.Success("login success"))
 }
 
+func (h *Handler) Logout(c *gin.Context) {
+	c.SetCookie(
+		"access_token",
+		"",
+		-1,
+		"/",
+		"",
+		false,
+		true,
+	)
+}
+
 func (h *Handler) GetMe(c *gin.Context) {
 
-	token, err := c.Cookie("Authorization")
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, response.Error("first /login"))
-		return
-	}
-
-	id, jErr := h.jwt.Parse(token)
-	if jErr != nil {
-		c.JSON(http.StatusInternalServerError, response.Error("internal error"))
-		return
-	}
-
-	me, sErr := h.userService.GetByID(id.UserID)
+	me, sErr := h.userService.GetByID(c.Request.Context(), middleware.UserID(c))
 	if sErr != nil {
 		c.JSON(http.StatusNotFound, response.Error(sErr.Error()))
 		return
@@ -112,4 +116,16 @@ func (h *Handler) GetMe(c *gin.Context) {
 }
 
 func (h *Handler) UpdateMe(c *gin.Context) {
+	var ur UpdateRequest
+	if err := c.ShouldBindJSON(&ur); err != nil {
+		c.JSON(http.StatusBadRequest,
+			response.Error(err.Error()))
+		return
+	}
+
+	serr := h.userService.Update(c.Request.Context(), middleware.UserID(c), &ur)
+	if serr != nil {
+		c.JSON(http.StatusBadRequest, response.Error(serr.Error()))
+		return
+	}
 }

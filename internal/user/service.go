@@ -26,8 +26,7 @@ func NewService(r Repository) *Service {
 	}
 }
 
-func (ser Service) Signup(req *SignupRequest) error {
-	ctx := context.Background()
+func (ser Service) Signup(ctx context.Context, req *SignupRequest) error {
 
 	ur, err := ser.repo.GetByEmail(ctx, req.Email)
 	if err != nil {
@@ -53,9 +52,7 @@ func (ser Service) Signup(req *SignupRequest) error {
 	return ser.repo.Create(ctx, user)
 }
 
-func (ser Service) Login(req *LoginRequest) (*User, error) {
-
-	ctx := context.Background()
+func (ser Service) Login(ctx context.Context, req *LoginRequest) (*User, error) {
 
 	ur, err := ser.repo.GetByEmail(ctx, req.Email)
 	if err != nil {
@@ -72,13 +69,17 @@ func (ser Service) Login(req *LoginRequest) (*User, error) {
 	return ur, nil
 }
 
-func (ser Service) Update(req *LoginRequest) error {
-	return nil
+func (ser Service) Update(ctx context.Context, ID uuid.UUID, req *UpdateRequest) error {
+
+	return ser.repo.Update(ctx, &User{
+		ID:              ID,
+		Email:           req.Email,
+		WithdrawAddress: req.Wallet,
+	})
+
 }
 
-func (ser Service) GetByID(ID uuid.UUID) (*MeResponse, error) {
-
-	ctx := context.Background()
+func (ser Service) GetByID(ctx context.Context, ID uuid.UUID) (*MeResponse, error) {
 
 	ur, err := ser.repo.GetByID(ctx, ID.String())
 	if err != nil {
