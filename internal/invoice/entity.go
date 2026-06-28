@@ -42,7 +42,6 @@ func (i *Invoice) BeforeCreate() {
 	i.Status = StatusPending
 	i.CreatedAt = now
 	i.UpdatedAt = now
-	i.ExpiredAt = now.Add(45 * time.Millisecond)
 }
 
 func (i *Invoice) IsExpired() bool {

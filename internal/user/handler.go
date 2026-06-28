@@ -128,4 +128,6 @@ func (h *Handler) UpdateMe(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, response.Error(serr.Error()))
 		return
 	}
+
+	c.JSON(http.StatusOK, response.Success("Done!"))
 }

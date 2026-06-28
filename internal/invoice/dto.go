@@ -8,7 +8,7 @@ import (
 )
 
 type CreateInvoiceRequest struct {
-	Amount      decimal.Decimal `json:"amount"`
+	Amount      decimal.Decimal `json:"amount" binding:"required"`
 	Description string          `json:"description"`
 	CallbackURL string          `json:"callback_url"`
 	Lifetime    int64           `json:"lifetime"`
