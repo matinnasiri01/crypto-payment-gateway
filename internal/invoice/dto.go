@@ -14,6 +14,13 @@ type CreateInvoiceRequest struct {
 	Lifetime    int64           `json:"lifetime"`
 }
 
+type UpdateInvoiceRequest struct {
+	ID          uuid.UUID       `json:"id"`
+	Status      Status          `json:"status"`
+	Amount      decimal.Decimal `json:"amount"`
+	Description string          `json:"description"`
+}
+
 type InvoiceResponse struct {
 	ID             uuid.UUID       `json:"id"`
 	Status         Status          `json:"status"`

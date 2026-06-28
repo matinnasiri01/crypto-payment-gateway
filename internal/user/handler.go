@@ -23,18 +23,19 @@ func NewHandler(us *Service, j *jwt.Manager) *Handler {
 
 func (h *Handler) Register(rg *gin.RouterGroup, auth *middleware.Auth) {
 
-	authGroup := rg.Group("/auth")
+	authRoutes := rg.Group("/auth")
 	{
-		authGroup.Use(auth.GuestOnly())
-		authGroup.POST("/signup", h.Signup)
-		authGroup.POST("/login", h.Login)
+		authRoutes.Use(auth.GuestOnly())
+		authRoutes.POST("/signup", h.Signup)
+		authRoutes.POST("/login", h.Login)
 	}
 
-	rg.Use(auth.Handler())
-	rg.POST("/auth/loguot", h.Logout)
-	rg.GET("/me", h.GetMe)
-	rg.PATCH("/me", h.UpdateMe)
-
+	userRoutes := rg.Group("", auth.Handler())
+	{
+		userRoutes.POST("/auth/logout", h.Logout)
+		userRoutes.GET("/me", h.GetMe)
+		userRoutes.PATCH("/me", h.UpdateMe)
+	}
 }
 
 func (h *Handler) Signup(c *gin.Context) {
