@@ -17,6 +17,7 @@ const defaultLifetime = 1800
 var (
 	ErrLifetime = fmt.Errorf("1800 < lifetime < 86400")
 	ErrNotFind  = fmt.Errorf("can`t find this invoice")
+	ErrNoRecord = fmt.Errorf("there is no record")
 )
 
 func NewService(r Repository) *Service {
@@ -54,7 +55,17 @@ func (s *Service) Create(ctx context.Context, ID uuid.UUID, req *CreateInvoiceRe
 }
 
 func (s *Service) List(ctx context.Context, ID uuid.UUID, page, limit int) (*[]Invoice, error) {
-	return s.repo.ListByUser(ctx, ID, Pagination{Page: page, Limit: limit})
+
+	list, err := s.repo.ListByUser(ctx, ID, Pagination{Page: page, Limit: limit})
+	if err != nil {
+		return nil, err
+	}
+
+	if len(*list) == 0 {
+		return nil, ErrNoRecord
+	}
+
+	return list, nil
 }
 
 func (s *Service) GetByID(ctx context.Context, invoiceID, userID uuid.UUID) (*Invoice, error) {

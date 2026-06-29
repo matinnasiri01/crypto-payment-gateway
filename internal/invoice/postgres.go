@@ -84,7 +84,7 @@ func (r *invoicePostgresRepo) Create(ctx context.Context, invoice *Invoice) erro
 func (r *invoicePostgresRepo) Update(ctx context.Context, invoice *Invoice, userID uuid.UUID) error {
 
 	query := `
-	UPDATE invoives
+	UPDATE invoices
 	SET
 		status = @status,
 		amount = @amount,
@@ -116,26 +116,27 @@ func (r *invoicePostgresRepo) Update(ctx context.Context, invoice *Invoice, user
 	return nil
 }
 
-func (r *invoicePostgresRepo) GetByID(ctx context.Context, ID uuid.UUID) (*Invoice, error) {
+func (r *invoicePostgresRepo) GetByID(ctx context.Context, id uuid.UUID) (*Invoice, error) {
 	var inv Invoice
 
 	err := r.pool.QueryRow(ctx, `
-	SELECT
-		id,
-		user_id,
-		status,
-		amount,
-		description,
-		callback_url,
-		pay_to_address,
-		paid_by_address,
-		overpayment,
-		created_at,
-		updated_at,
-		expired_at
-	FROM invoices
-	WHERE id = $1;
-	`, ID).Scan(
+		SELECT
+			id,
+			user_id,
+			status,
+			amount,
+			description,
+			callback_url,
+			pay_to_address,
+			paid_by_address,
+			overpayment,
+			created_at,
+			updated_at,
+			expired_at
+		FROM invoices
+		WHERE id = $1
+		  AND status <> 'deleted';
+	`, id).Scan(
 		&inv.ID,
 		&inv.UserID,
 		&inv.Status,
@@ -151,7 +152,7 @@ func (r *invoicePostgresRepo) GetByID(ctx context.Context, ID uuid.UUID) (*Invoi
 	)
 
 	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, nil
+		return nil, ErrInvoiceNotFound
 	}
 
 	if err != nil {
@@ -159,7 +160,6 @@ func (r *invoicePostgresRepo) GetByID(ctx context.Context, ID uuid.UUID) (*Invoi
 	}
 
 	return &inv, nil
-
 }
 
 func (r *invoicePostgresRepo) ListByUser(ctx context.Context, userID uuid.UUID, p Pagination) (*[]Invoice, error) {
@@ -181,7 +181,7 @@ func (r *invoicePostgresRepo) ListByUser(ctx context.Context, userID uuid.UUID, 
 		updated_at,
 		expired_at
 	FROM invoices
-	WHERE user_id = @user_id
+	WHERE user_id = @user_id AND status <> 'deleted'
 	ORDER BY created_at DESC
 	LIMIT @limit
 	OFFSET @offset;
@@ -235,14 +235,21 @@ func (r *invoicePostgresRepo) ListByUser(ctx context.Context, userID uuid.UUID, 
 
 func (r *invoicePostgresRepo) Delete(ctx context.Context, invoiceID, userID uuid.UUID) error {
 
-	cmd, err := r.pool.Exec(
-		ctx,
-		`DELETE FROM invoices
-		 WHERE id = $1
-		   AND user_id = $2`,
-		invoiceID,
-		userID,
-	)
+	query := `
+	UPDATE invoices
+	SET
+		status = @status,	
+		updated_at = NOW()
+	WHERE id = @id AND user_id = @user_id;
+	`
+
+	args := pgx.NamedArgs{
+		"id":      invoiceID,
+		"user_id": userID,
+		"status":  StatusDeleted,
+	}
+
+	cmd, err := r.pool.Exec(ctx, query, args)
 	if err != nil {
 		return err
 	}

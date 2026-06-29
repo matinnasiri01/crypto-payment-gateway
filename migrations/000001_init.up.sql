@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS invoices (
     id              UUID           PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id         UUID           NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     status          TEXT           NOT NULL DEFAULT 'pending'
-    CHECK (status IN ('pending', 'paid', 'cancelled', 'expired')),
+    CHECK (status IN ('pending', 'paid', 'cancelled', 'expired', 'deleted')),
     amount          NUMERIC(36,18) NOT NULL,
     description     TEXT,
     callback_url    TEXT,

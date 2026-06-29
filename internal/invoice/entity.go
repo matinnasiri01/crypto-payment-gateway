@@ -14,6 +14,7 @@ const (
 	StatusPaid      Status = "paid"
 	StatusCancelled Status = "cancelled"
 	StatusExpired   Status = "expired"
+	StatusDeleted   Status = "deleted"
 )
 
 type Invoice struct {
