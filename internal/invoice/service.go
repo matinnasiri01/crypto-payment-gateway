@@ -61,10 +61,6 @@ func (s *Service) List(ctx context.Context, ID uuid.UUID, page, limit int) (*[]I
 		return nil, err
 	}
 
-	if len(*list) == 0 {
-		return nil, ErrNoRecord
-	}
-
 	return list, nil
 }
 

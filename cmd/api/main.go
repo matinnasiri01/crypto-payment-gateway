@@ -8,6 +8,7 @@ import (
 	"crypto-payment-gateway/pkg/database"
 	"crypto-payment-gateway/pkg/jwt"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -25,7 +26,7 @@ func main() {
 
 	pool, err := database.NewPostgresDB(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
-		fmt.Print("can`t connect to db")
+		log.Fatal("can`t connect to db")
 	}
 
 	jwtManager := jwt.New(os.Getenv("JWT_SECRET"))

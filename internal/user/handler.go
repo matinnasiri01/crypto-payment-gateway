@@ -51,7 +51,7 @@ func (h *Handler) Signup(c *gin.Context) {
 
 	e := h.userService.Signup(c.Request.Context(), &sr)
 	if e != nil {
-		c.JSON(http.StatusCreated, response.Error(e.Error()))
+		c.JSON(http.StatusConflict, response.Error(e.Error()))
 		return
 	}
 
@@ -103,6 +103,7 @@ func (h *Handler) Logout(c *gin.Context) {
 		false,
 		true,
 	)
+	c.JSON(http.StatusOK, response.Success("logout success"))
 }
 
 func (h *Handler) GetMe(c *gin.Context) {

@@ -130,9 +130,8 @@ func (h *Handler) Delete(c *gin.Context) {
 		c.JSON(http.StatusNotFound, response.Error(err.Error()))
 		return
 	}
-	// todo It would be more logical if we had a specific status for the deleted ones instead of deleting them completely.
-	c.JSON(http.StatusOK, response.Success("deleted"))
 
+	c.JSON(http.StatusOK, response.Success("deleted"))
 }
 
 func (h *Handler) Pay(c *gin.Context) {
