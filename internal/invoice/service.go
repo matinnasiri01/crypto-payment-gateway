@@ -14,6 +14,7 @@ type Service struct {
 
 const defaultLifetime = 1800
 
+// todo override the errors or make pkg/errors to set and handle one time!
 var (
 	ErrLifetime = fmt.Errorf("1800 < lifetime < 86400")
 	ErrNotFind  = fmt.Errorf("can`t find this invoice")
@@ -26,7 +27,7 @@ func NewService(r Repository) *Service {
 	}
 }
 
-func (s *Service) Create(ctx context.Context, ID uuid.UUID, req *CreateInvoiceRequest) error {
+func (s *Service) Create(ctx context.Context, ID uuid.UUID, req *CreateRequest) error {
 
 	lifetime := defaultLifetime
 	if req.Lifetime != 0 {
@@ -77,14 +78,14 @@ func (s *Service) GetByID(ctx context.Context, invoiceID, userID uuid.UUID) (*In
 	return res, nil
 }
 
-func (s *Service) GetForPay(ctx context.Context, invoiceID uuid.UUID) (*InvoiceResponse, error) {
+func (s *Service) GetForPay(ctx context.Context, invoiceID uuid.UUID) (*Response, error) {
 
 	res, err := s.repo.GetByID(ctx, invoiceID)
 	if err != nil {
 		return nil, err
 	}
 
-	ri := InvoiceResponse{
+	ri := Response{
 		ID:             res.ID,
 		Status:         res.Status,
 		Amount:         res.Amount,
@@ -100,6 +101,8 @@ func (s *Service) Delete(ctx context.Context, invoiceID, userID uuid.UUID) error
 	return s.repo.Delete(ctx, invoiceID, userID)
 }
 
-func (s *Service) Update(ctx context.Context, ID uuid.UUID, req *UpdateInvoiceRequest) error {
+func (s *Service) Update(ctx context.Context, ID uuid.UUID, req *UpdateRequest) error {
+
+	// todo update the invoice and done API endpoints!
 	return nil
 }

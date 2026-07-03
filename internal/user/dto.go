@@ -12,23 +12,12 @@ type LoginRequest struct {
 }
 
 type UpdateRequest struct {
-	Email  string `json:"email" binding:"required,email"`
 	Wallet string `json:"wallet" binding:"required"`
 }
 
-type MeResponse struct {
+type Response struct {
 	ID      string `json:"id"`
 	Email   string `json:"email"`
 	Wallet  string `json:"wallet"`
 	Balance string `json:"balance"`
-}
-
-func (user *User) Convert() *MeResponse {
-
-	return &MeResponse{
-		ID:      user.ID.String(),
-		Email:   user.Email,
-		Wallet:  user.WithdrawAddress,
-		Balance: user.Balance.String(),
-	}
 }

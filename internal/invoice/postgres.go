@@ -14,6 +14,8 @@ type invoicePostgresRepo struct {
 	pool *pgxpool.Pool
 }
 
+// todo if is impossible use one func to call to db also for users
+
 var (
 	ErrInvoiceNotFound = fmt.Errorf("invoice dost exist")
 )

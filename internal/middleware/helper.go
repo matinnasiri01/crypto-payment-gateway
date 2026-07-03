@@ -8,3 +8,5 @@ import (
 func UserID(c *gin.Context) uuid.UUID {
 	return c.MustGet("user_id").(uuid.UUID)
 }
+
+// todo add redis and make rate limits for ips

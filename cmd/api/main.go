@@ -7,18 +7,19 @@ import (
 	"crypto-payment-gateway/internal/user"
 	"crypto-payment-gateway/pkg/database"
 	"crypto-payment-gateway/pkg/jwt"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func init() {
 	if err := godotenv.Load(); err != nil {
-		fmt.Errorf("can`t find .env")
+		log.Fatal("can`t find .env")
 	}
 }
 
@@ -40,14 +41,16 @@ func main() {
 	// invoice
 	ir := invoice.NewPostgresRepo(pool.Pool)
 	is := invoice.NewService(ir)
-	ih := invoice.NewHandler(is, jwtManager)
+	ih := invoice.NewHandler(is)
 
 	r := gin.Default()
 
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	r.GET("/health", func(c *gin.Context) {
 		c.String(http.StatusOK, "Oky!")
-
-	})
+	},
+	)
 
 	api := r.Group("/api/v1")
 

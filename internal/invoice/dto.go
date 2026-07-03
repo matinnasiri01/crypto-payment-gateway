@@ -7,25 +7,26 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-type CreateInvoiceRequest struct {
-	Amount      decimal.Decimal `json:"amount" binding:"required"`
+type CreateRequest struct {
+	Amount      decimal.Decimal `json:"amount" binding:"required,gt=0"`
 	Description string          `json:"description"`
 	CallbackURL string          `json:"callback_url"`
 	Lifetime    int64           `json:"lifetime"`
 }
 
-type UpdateInvoiceRequest struct {
-	ID          uuid.UUID       `json:"id"`
-	Status      Status          `json:"status"`
-	Amount      decimal.Decimal `json:"amount"`
+type UpdateRequest struct {
+	Amount      decimal.Decimal `json:"amount" binding:"required,gt=0"`
 	Description string          `json:"description"`
 }
 
-type InvoiceResponse struct {
-	ID             uuid.UUID       `json:"id"`
-	Status         Status          `json:"status"`
-	Amount         decimal.Decimal `json:"amount"`
-	Description    string          `json:"description"`
-	PaymentAddress string          `json:"pay_to_address"`
-	ExpiredAt      time.Time       `json:"expired_at"`
+type Response struct {
+	ID            uuid.UUID       `json:"id"`
+	Status        Status          `json:"status"`
+	Amount        decimal.Decimal `json:"amount"`
+	Description   string          `json:"description"`
+	PayToAddress  string          `json:"pay_to_address"`
+	PaidByAddress string          `json:"paid_by_address,omitempty"`
+	Overpayment   decimal.Decimal `json:"overpayment"`
+	CreatedAt     time.Time       `json:"created_at"`
+	ExpiredAt     time.Time       `json:"expired_at"`
 }

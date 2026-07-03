@@ -79,7 +79,7 @@ func (ser Service) Update(ctx context.Context, ID uuid.UUID, req *UpdateRequest)
 
 }
 
-func (ser Service) GetByID(ctx context.Context, ID uuid.UUID) (*MeResponse, error) {
+func (ser Service) GetByID(ctx context.Context, ID uuid.UUID) (*Response, error) {
 
 	ur, err := ser.repo.GetByID(ctx, ID.String())
 	if err != nil {

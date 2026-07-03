@@ -2,7 +2,6 @@ package invoice
 
 import (
 	"crypto-payment-gateway/internal/middleware"
-	"crypto-payment-gateway/pkg/jwt"
 	"crypto-payment-gateway/pkg/response"
 	"net/http"
 	"strconv"
@@ -13,7 +12,6 @@ import (
 
 type Handler struct {
 	invoiceService *Service
-	jwt            *jwt.Manager
 }
 
 const (
@@ -21,10 +19,9 @@ const (
 	MaxLimit     = 100
 )
 
-func NewHandler(us *Service, j *jwt.Manager) *Handler {
+func NewHandler(us *Service) *Handler {
 	return &Handler{
 		invoiceService: us,
-		jwt:            j,
 	}
 }
 
@@ -45,7 +42,7 @@ func (h *Handler) Register(rg *gin.RouterGroup, auth *middleware.Auth) {
 
 func (h *Handler) Create(c *gin.Context) {
 
-	var ci CreateInvoiceRequest
+	var ci CreateRequest
 	if err := c.ShouldBindJSON(&ci); err != nil {
 		c.JSON(http.StatusBadRequest,
 			response.Error(err.Error()))

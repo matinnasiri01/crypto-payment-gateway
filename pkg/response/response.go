@@ -1,25 +1,38 @@
 package response
 
-import "time"
-
 type Response struct {
-	Status  string    `json:"status"`
-	Message string    `json:"mssage"`
-	Date    time.Time `json:"time"`
+	Status  string `json:"status"`
+	Data    any    `json:"data,omitempty"`
+	Message string `json:"message,omitempty"`
+	Code    int    `json:"code,omitempty"`
 }
 
-func Success(mes string) Response {
+func Success(data any) Response {
 	return Response{
-		Status:  "Success",
-		Message: mes,
-		Date:    time.Now(),
+		Status: "success",
+		Data:   data,
 	}
 }
 
-func Error(mes string) Response {
+func Fail(data any) Response {
 	return Response{
-		Status:  "Error",
-		Message: mes,
-		Date:    time.Now(),
+		Status: "fail",
+		Data:   data,
+	}
+}
+
+func Error(message string) Response {
+	return Response{
+		Status:  "error",
+		Message: message,
+	}
+}
+
+func ErrorCode(code int, message string, data any) Response {
+	return Response{
+		Status:  "error",
+		Message: message,
+		Code:    code,
+		Data:    data,
 	}
 }
