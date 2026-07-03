@@ -28,6 +28,12 @@ CREATE TABLE IF NOT EXISTS invoices (
     expired_at      TIMESTAMPTZ    NOT NULL
     );
 
-CREATE INDEX IF NOT EXISTS idx_invoices_user_id    ON invoices(user_id);
-CREATE INDEX IF NOT EXISTS idx_invoices_status     ON invoices(status);
-CREATE INDEX IF NOT EXISTS idx_invoices_expired_at ON invoices(expired_at);
+
+CREATE INDEX IF NOT EXISTS idx_invoices_user_created
+    ON invoices (user_id, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_invoices_status_expired
+    ON invoices (status, expired_at);
+
+CREATE INDEX IF NOT EXISTS idx_invoices_address_status
+    ON invoices (pay_to_address, status);
