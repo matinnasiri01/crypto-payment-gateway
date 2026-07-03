@@ -114,6 +114,20 @@ func (h *Handler) GetByID(c *gin.Context) {
 
 func (h *Handler) Update(c *gin.Context) {
 
+	var ci UpdateRequest
+	if err := c.ShouldBindJSON(&ci); err != nil {
+		c.JSON(http.StatusBadRequest,
+			response.Error(err.Error()))
+		return
+	}
+
+	sErr := h.invoiceService.Update(c.Request.Context(), middleware.UserID(c), &ci)
+	if sErr != nil {
+		c.JSON(http.StatusBadRequest, response.Error(sErr.Error()))
+		return
+	}
+
+	c.JSON(http.StatusCreated, response.Success("updated."))
 }
 func (h *Handler) Delete(c *gin.Context) {
 

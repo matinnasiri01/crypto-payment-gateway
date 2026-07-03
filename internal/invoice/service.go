@@ -86,12 +86,11 @@ func (s *Service) GetForPay(ctx context.Context, invoiceID uuid.UUID) (*Response
 	}
 
 	ri := Response{
-		ID:             res.ID,
-		Status:         res.Status,
-		Amount:         res.Amount,
-		Description:    res.Description,
-		PaymentAddress: res.PayToAddress,
-		ExpiredAt:      res.ExpiredAt,
+		ID:          res.ID,
+		Status:      res.Status,
+		Amount:      res.Amount,
+		Description: res.Description,
+		ExpiredAt:   res.ExpiredAt,
 	}
 
 	return &ri, nil
@@ -102,7 +101,9 @@ func (s *Service) Delete(ctx context.Context, invoiceID, userID uuid.UUID) error
 }
 
 func (s *Service) Update(ctx context.Context, ID uuid.UUID, req *UpdateRequest) error {
-
-	// todo update the invoice and done API endpoints!
-	return nil
+	return s.repo.Update(ctx, &Invoice{
+		UserID:      ID,
+		Amount:      req.Amount,
+		Description: req.Description,
+	})
 }

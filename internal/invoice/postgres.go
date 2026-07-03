@@ -10,21 +10,19 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type invoicePostgresRepo struct {
+type PostgresRepo struct {
 	pool *pgxpool.Pool
 }
-
-// todo if is impossible use one func to call to db also for users
 
 var (
 	ErrInvoiceNotFound = fmt.Errorf("invoice dost exist")
 )
 
-func NewPostgresRepo(p *pgxpool.Pool) *invoicePostgresRepo {
-	return &invoicePostgresRepo{pool: p}
+func NewPostgresRepo(p *pgxpool.Pool) *PostgresRepo {
+	return &PostgresRepo{pool: p}
 }
 
-func (r *invoicePostgresRepo) Create(ctx context.Context, invoice *Invoice) error {
+func (r *PostgresRepo) Create(ctx context.Context, invoice *Invoice) error {
 	{
 
 		query := `
@@ -83,42 +81,39 @@ func (r *invoicePostgresRepo) Create(ctx context.Context, invoice *Invoice) erro
 
 }
 
-func (r *invoicePostgresRepo) Update(ctx context.Context, invoice *Invoice, userID uuid.UUID) error {
+func (r *PostgresRepo) Update(ctx context.Context, invoice *Invoice) error {
 
 	query := `
 	UPDATE invoices
 	SET
-		status = @status,
 		amount = @amount,
 		description = @description,
-		callback_url = @callback_url,
-		pay_to_address = @pay_to_address,
-		paid_by_address = @paid_by_address,
-		overpayment = @overpayment,		
 		updated_at = NOW()
-	WHERE id = @id AND user_id = @user_id;
+	WHERE id = @id
+	  AND user_id = @user_id
+	  AND status = 'pending';
 	`
 
 	args := pgx.NamedArgs{
-		"id":              invoice.ID,
-		"user_id":         userID,
-		"status":          invoice.Status,
-		"description":     invoice.Description,
-		"callback_url":    invoice.CallbackURL,
-		"pay_to_address":  invoice.PayToAddress,
-		"paid_by_address": invoice.PaidByAddress,
-		"overpayment":     invoice.Overpayment,
+		"id":          invoice.ID,
+		"user_id":     invoice.UserID,
+		"amount":      invoice.Amount,
+		"description": invoice.Description,
 	}
 
-	_, err := r.pool.Exec(ctx, query, args)
+	cmd, err := r.pool.Exec(ctx, query, args)
 	if err != nil {
 		return err
+	}
+
+	if cmd.RowsAffected() == 0 {
+		return ErrInvoiceNotFound
 	}
 
 	return nil
 }
 
-func (r *invoicePostgresRepo) GetByID(ctx context.Context, id uuid.UUID) (*Invoice, error) {
+func (r *PostgresRepo) GetByID(ctx context.Context, id uuid.UUID) (*Invoice, error) {
 	var inv Invoice
 
 	err := r.pool.QueryRow(ctx, `
@@ -164,7 +159,7 @@ func (r *invoicePostgresRepo) GetByID(ctx context.Context, id uuid.UUID) (*Invoi
 	return &inv, nil
 }
 
-func (r *invoicePostgresRepo) ListByUser(ctx context.Context, userID uuid.UUID, p Pagination) (*[]Invoice, error) {
+func (r *PostgresRepo) ListByUser(ctx context.Context, userID uuid.UUID, p Pagination) (*[]Invoice, error) {
 
 	offset := (p.Page - 1) * p.Limit
 
@@ -235,7 +230,7 @@ func (r *invoicePostgresRepo) ListByUser(ctx context.Context, userID uuid.UUID, 
 	return &invoices, nil
 }
 
-func (r *invoicePostgresRepo) Delete(ctx context.Context, invoiceID, userID uuid.UUID) error {
+func (r *PostgresRepo) Delete(ctx context.Context, invoiceID, userID uuid.UUID) error {
 
 	query := `
 	UPDATE invoices
