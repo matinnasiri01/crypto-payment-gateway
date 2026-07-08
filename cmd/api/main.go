@@ -15,6 +15,7 @@ package main
 
 import (
 	"context"
+	"crypto-payment-gateway/internal/blockchain"
 	"crypto-payment-gateway/internal/invoice"
 	"crypto-payment-gateway/internal/middleware"
 	"crypto-payment-gateway/internal/user"
@@ -48,15 +49,21 @@ func main() {
 	jwtManager := jwt.New(os.Getenv("JWT_SECRET"))
 	auth := middleware.NewAuth(jwtManager)
 
+	// blockchain
+	chain := blockchain.NewTRC20()
+
 	// user
 	ur := user.NewPostgresRepo(pool.Pool)
-	us := user.NewService(ur)
+	us := user.NewService(ur, chain)
 	uh := user.NewHandler(us, jwtManager)
 
 	// invoice
 	ir := invoice.NewPostgresRepo(pool.Pool)
 	is := invoice.NewService(ir)
 	ih := invoice.NewHandler(is)
+
+	is.StartWatcher(context.Background())
+	is.StartWorker(context.Background())
 
 	r := gin.Default()
 

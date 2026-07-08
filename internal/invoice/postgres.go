@@ -257,3 +257,7 @@ func (r *PostgresRepo) Delete(ctx context.Context, invoiceID, userID uuid.UUID) 
 
 	return nil
 }
+
+func (r *PostgresRepo) GetPending(ctx context.Context) (*[]Invoice, error) {
+	return nil, nil
+}

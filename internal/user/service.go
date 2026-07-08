@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"crypto-payment-gateway/internal/blockchain"
 	"crypto-payment-gateway/pkg/password"
 	"fmt"
 
@@ -9,7 +10,8 @@ import (
 )
 
 type Service struct {
-	repo Repository
+	repo  Repository
+	chain blockchain.Blockchain
 }
 
 var (
@@ -20,9 +22,10 @@ var (
 	ErrPasswordHashing = fmt.Errorf("problem with password encryption")
 )
 
-func NewService(r Repository) *Service {
+func NewService(r Repository, b blockchain.Blockchain) *Service {
 	return &Service{
-		repo: r,
+		repo:  r,
+		chain: b,
 	}
 }
 

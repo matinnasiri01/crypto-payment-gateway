@@ -12,6 +12,8 @@ type Repository interface {
 	GetByID(ctx context.Context, invoiceID uuid.UUID) (*Invoice, error)
 	ListByUser(ctx context.Context, userID uuid.UUID, p Pagination) (*[]Invoice, error)
 	Delete(ctx context.Context, invoiceID, userID uuid.UUID) error
+
+	GetPending(ctx context.Context) (*[]Invoice, error)
 }
 
 type Pagination struct {

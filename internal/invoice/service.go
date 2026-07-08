@@ -2,6 +2,8 @@ package invoice
 
 import (
 	"context"
+	"crypto-payment-gateway/internal/blockchain"
+
 	"fmt"
 	"time"
 
@@ -10,7 +12,8 @@ import (
 )
 
 type Service struct {
-	repo Repository
+	repo  Repository
+	chain blockchain.Blockchain
 }
 
 const defaultLifetime = 1800
@@ -119,4 +122,12 @@ func (s *Service) Update(ctx context.Context, ID uuid.UUID, req *UpdateRequest) 
 		Amount:      req.Amount,
 		Description: req.Description,
 	})
+}
+
+func (s *Service) StartWatcher(ctx context.Context) {
+
+}
+
+func (s *Service) StartWorker(ctx context.Context) {
+
 }
