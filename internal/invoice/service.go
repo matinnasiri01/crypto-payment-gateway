@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 )
 
 type Service struct {
@@ -16,9 +17,9 @@ const defaultLifetime = 1800
 
 // todo override the errors or make pkg/errors to set and handle one time!
 var (
-	ErrLifetime = fmt.Errorf("1800 < lifetime < 86400")
-	ErrNotFind  = fmt.Errorf("can`t find this invoice")
-	ErrNoRecord = fmt.Errorf("there is no record")
+	ErrLifetime      = fmt.Errorf("1800 < lifetime < 86400")
+	ErrNotFind       = fmt.Errorf("can`t find this invoice")
+	ErrInvalidAmount = fmt.Errorf("amount error")
 )
 
 func NewService(r Repository) *Service {
@@ -36,6 +37,9 @@ func (s *Service) Create(ctx context.Context, ID uuid.UUID, req *CreateRequest) 
 		}
 
 		lifetime = int(req.Lifetime)
+	}
+	if req.Amount.LessThanOrEqual(decimal.Zero) {
+		return ErrInvalidAmount
 	}
 
 	invo := &Invoice{

@@ -40,6 +40,15 @@ func (h *Handler) Register(rg *gin.RouterGroup, auth *middleware.Auth) {
 
 }
 
+// @Summary Create Invoice
+// @Description Create a new payment invoice
+// @Tags Invoice
+// @Accept json
+// @Produce json
+// @Param request body CreateRequest true "Invoice Request"
+// @Success 201 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Router /invoice [post]
 func (h *Handler) Create(c *gin.Context) {
 
 	var ci CreateRequest
@@ -58,6 +67,16 @@ func (h *Handler) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, response.Success("invoice created."))
 }
 
+// @Summary List invoices
+// @Description Get a paginated list of invoices
+// @Tags Invoice
+// @Accept json
+// @Produce json
+// @Param page query int false "Page number"
+// @Param limit query int false "Items per page"
+// @Success 200 {object} []invoice.Invoice
+// @Failure 400 {object} response.Response
+// @Router /invoices [get]
 func (h *Handler) List(c *gin.Context) {
 
 	page := 1
@@ -94,6 +113,15 @@ func (h *Handler) List(c *gin.Context) {
 
 }
 
+// @Summary Get invoice by ID
+// @Description Get invoice by ID
+// @Tags Invoice
+// @Accept json
+// @Produce json
+// @Param id path string true "Invoice ID"
+// @Success 200 {object} invoice.Invoice
+// @Failure 400 {object} response.Response
+// @Router /invoices/{id} [get]
 func (h *Handler) GetByID(c *gin.Context) {
 
 	id, uErr := uuid.Parse(c.Param("id"))
@@ -112,6 +140,17 @@ func (h *Handler) GetByID(c *gin.Context) {
 
 }
 
+// @Summary Update invoice
+// @Description Update invoice by ID
+// @Tags Invoice
+// @Accept json
+// @Produce json
+// @Param id path string true "Invoice ID"
+// @Param request body UpdateRequest true "Update Request"
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 404 {object} response.Response
+// @Router /invoices/{id} [patch]
 func (h *Handler) Update(c *gin.Context) {
 
 	var ci UpdateRequest
@@ -129,6 +168,17 @@ func (h *Handler) Update(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, response.Success("updated."))
 }
+
+// @Summary Delete an invoice
+// @Description Delete an invoice by ID
+// @Tags Invoice
+// @Accept json
+// @Produce json
+// @Param id path string true "Invoice ID"
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 404 {object} response.Response
+// @Router /invoices/{id} [delete]
 func (h *Handler) Delete(c *gin.Context) {
 
 	id, uErr := uuid.Parse(c.Param("id"))
@@ -145,6 +195,14 @@ func (h *Handler) Delete(c *gin.Context) {
 	c.JSON(http.StatusOK, response.Success("deleted"))
 }
 
+// @Summary Pay invoice
+// @Description Pay an invoice by ID
+// @Tags Invoice
+// @Produce json
+// @Param id path string true "Invoice ID"
+// @Success 302 {object} invoice.Response
+// @Failure 400 {object} response.Response
+// @Router /pay/{id} [get]
 func (h *Handler) Pay(c *gin.Context) {
 
 	id, uErr := uuid.Parse(c.Param("id"))

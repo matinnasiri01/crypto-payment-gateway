@@ -73,7 +73,6 @@ func (ser Service) Update(ctx context.Context, ID uuid.UUID, req *UpdateRequest)
 
 	return ser.repo.Update(ctx, &User{
 		ID:              ID,
-		Email:           req.Email,
 		WithdrawAddress: req.Wallet,
 	})
 
@@ -89,5 +88,10 @@ func (ser Service) GetByID(ctx context.Context, ID uuid.UUID) (*Response, error)
 		return nil, ErrUserNotExists
 	}
 
-	return ur.Convert(), nil
+	return &Response{
+		ID:      ur.ID.String(),
+		Email:   ur.Email,
+		Wallet:  ur.WithdrawAddress,
+		Balance: ur.Balance.String(),
+	}, nil
 }

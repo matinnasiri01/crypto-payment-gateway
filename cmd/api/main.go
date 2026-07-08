@@ -1,5 +1,18 @@
 package main
 
+// @title Crypto Payment Gateway API
+// @version 1.0
+// @description Crypto Payment Gateway for accepting USDT payments.
+
+// @contact.name Matin Nasiri
+// @contact.email mnasirii829@gmail.com
+
+// @license.name MIT
+
+// @securityDefinitions.apikey CookieAuth
+// @in cookie
+// @name access_token
+
 import (
 	"context"
 	"crypto-payment-gateway/internal/invoice"
@@ -10,6 +23,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"crypto-payment-gateway/docs"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -47,16 +62,24 @@ func main() {
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	r.GET("/health", func(c *gin.Context) {
-		c.String(http.StatusOK, "Oky!")
-	},
-	)
+	r.GET("/health", HealthCheck)
 
 	api := r.Group("/api/v1")
+	docs.SwaggerInfo.BasePath = "/api/v1"
 
 	uh.Register(api, auth)
 	ih.Register(api, auth)
 
 	_ = r.Run(":" + os.Getenv("PORT"))
 
+}
+
+// @Summary Health Check
+// @Description Check server status
+// @Tags Health
+// @Produce plain
+// @Success 200 {string} string "OK!"
+// @Router /health [get]
+func HealthCheck(c *gin.Context) {
+	c.String(http.StatusOK, "OK!")
 }

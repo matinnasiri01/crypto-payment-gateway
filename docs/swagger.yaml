@@ -1,0 +1,442 @@
+definitions:
+  invoice.CreateRequest:
+    properties:
+      amount:
+        type: number
+      callback_url:
+        type: string
+      description:
+        type: string
+      lifetime:
+        type: integer
+    required:
+    - amount
+    type: object
+  invoice.Invoice:
+    properties:
+      amount:
+        type: number
+      callbackURL:
+        type: string
+      createdAt:
+        type: string
+      description:
+        type: string
+      expiredAt:
+        type: string
+      id:
+        type: string
+      overpayment:
+        type: number
+      paidByAddress:
+        type: string
+      payToAddress:
+        type: string
+      status:
+        $ref: '#/definitions/invoice.Status'
+      updatedAt:
+        type: string
+      userID:
+        type: string
+    type: object
+  invoice.Response:
+    properties:
+      amount:
+        type: number
+      created_at:
+        type: string
+      description:
+        type: string
+      expired_at:
+        type: string
+      id:
+        type: string
+      overpayment:
+        type: number
+      paid_by_address:
+        type: string
+      pay_to_address:
+        type: string
+      status:
+        $ref: '#/definitions/invoice.Status'
+    type: object
+  invoice.Status:
+    enum:
+    - pending
+    - paid
+    - cancelled
+    - expired
+    - deleted
+    type: string
+    x-enum-varnames:
+    - StatusPending
+    - StatusPaid
+    - StatusCancelled
+    - StatusExpired
+    - StatusDeleted
+  invoice.UpdateRequest:
+    properties:
+      amount:
+        type: number
+      description:
+        type: string
+    required:
+    - amount
+    type: object
+  response.Response:
+    properties:
+      code:
+        type: integer
+      data: {}
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  user.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  user.SignupRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      wallet:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  user.UpdateRequest:
+    properties:
+      wallet:
+        type: string
+    required:
+    - wallet
+    type: object
+info:
+  contact:
+    email: mnasirii829@gmail.com
+    name: Matin Nasiri
+  description: Crypto Payment Gateway for accepting USDT payments.
+  license:
+    name: MIT
+  title: Crypto Payment Gateway API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Login User and Generate Token
+      parameters:
+      - description: Login Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/user.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Login User
+      tags:
+      - Auth
+  /auth/logout:
+    post:
+      description: Logout Current User
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Logout User
+      tags:
+      - Auth
+  /auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: Signup New User
+      parameters:
+      - description: Signup Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/user.SignupRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Signup User
+      tags:
+      - Auth
+  /health:
+    get:
+      description: Check server status
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK!
+          schema:
+            type: string
+      summary: Health Check
+      tags:
+      - Health
+  /invoice:
+    post:
+      consumes:
+      - application/json
+      description: Create a new payment invoice
+      parameters:
+      - description: Invoice Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/invoice.CreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Create Invoice
+      tags:
+      - Invoice
+  /invoices:
+    get:
+      consumes:
+      - application/json
+      description: Get a paginated list of invoices
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/invoice.Invoice'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: List invoices
+      tags:
+      - Invoice
+  /invoices/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an invoice by ID
+      parameters:
+      - description: Invoice ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Delete an invoice
+      tags:
+      - Invoice
+    get:
+      consumes:
+      - application/json
+      description: Get invoice by ID
+      parameters:
+      - description: Invoice ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/invoice.Invoice'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get invoice by ID
+      tags:
+      - Invoice
+    patch:
+      consumes:
+      - application/json
+      description: Update invoice by ID
+      parameters:
+      - description: Invoice ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/invoice.UpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Update invoice
+      tags:
+      - Invoice
+  /me:
+    get:
+      description: get Current User data
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/invoice.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get User Data
+      tags:
+      - User
+    patch:
+      consumes:
+      - application/json
+      description: Update current user
+      parameters:
+      - description: Update Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/user.UpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - CookieAuth: []
+      summary: Update user
+      tags:
+      - User
+  /pay/{id}:
+    get:
+      description: Pay an invoice by ID
+      parameters:
+      - description: Invoice ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "302":
+          description: Found
+          schema:
+            $ref: '#/definitions/invoice.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Pay invoice
+      tags:
+      - Invoice
+securityDefinitions:
+  CookieAuth:
+    in: cookie
+    name: access_token
+    type: apiKey
+swagger: "2.0"
