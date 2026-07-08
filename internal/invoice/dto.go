@@ -19,6 +19,13 @@ type UpdateRequest struct {
 	Description string          `json:"description"`
 }
 
+type ListResponse struct {
+	Page  int        `json:"page"`
+	Limit int        `json:"limit"`
+	Count int        `json:"count"`
+	List  *[]Invoice `json:"list"`
+}
+
 type Response struct {
 	ID            uuid.UUID       `json:"id"`
 	Status        Status          `json:"status"`

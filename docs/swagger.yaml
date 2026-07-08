@@ -12,33 +12,6 @@ definitions:
     required:
     - amount
     type: object
-  invoice.Invoice:
-    properties:
-      amount:
-        type: number
-      callbackURL:
-        type: string
-      createdAt:
-        type: string
-      description:
-        type: string
-      expiredAt:
-        type: string
-      id:
-        type: string
-      overpayment:
-        type: number
-      paidByAddress:
-        type: string
-      payToAddress:
-        type: string
-      status:
-        $ref: '#/definitions/invoice.Status'
-      updatedAt:
-        type: string
-      userID:
-        type: string
-    type: object
   invoice.Response:
     properties:
       amount:
@@ -270,9 +243,7 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/invoice.Invoice'
-            type: array
+            $ref: '#/definitions/response.Response'
         "400":
           description: Bad Request
           schema:
@@ -325,7 +296,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/invoice.Invoice'
+            $ref: '#/definitions/response.Response'
         "400":
           description: Bad Request
           schema:

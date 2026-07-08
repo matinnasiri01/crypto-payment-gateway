@@ -74,7 +74,7 @@ func (h *Handler) Create(c *gin.Context) {
 // @Produce json
 // @Param page query int false "Page number"
 // @Param limit query int false "Items per page"
-// @Success 200 {object} []invoice.Invoice
+// @Success 200 {object} response.Response
 // @Failure 400 {object} response.Response
 // @Router /invoices [get]
 func (h *Handler) List(c *gin.Context) {
@@ -108,8 +108,7 @@ func (h *Handler) List(c *gin.Context) {
 		return
 	}
 
-	// todo Adding page limit and total record count values to the response
-	c.JSON(http.StatusOK, list)
+	c.JSON(http.StatusOK, response.Success(list))
 
 }
 
@@ -119,7 +118,7 @@ func (h *Handler) List(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "Invoice ID"
-// @Success 200 {object} invoice.Invoice
+// @Success 200 {object} response.Response
 // @Failure 400 {object} response.Response
 // @Router /invoices/{id} [get]
 func (h *Handler) GetByID(c *gin.Context) {
@@ -136,7 +135,7 @@ func (h *Handler) GetByID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusFound, res)
+	c.JSON(http.StatusFound, response.Success(res))
 
 }
 

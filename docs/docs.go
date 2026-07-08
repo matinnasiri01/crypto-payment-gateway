@@ -230,10 +230,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/invoice.Invoice"
-                            }
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "400": {
@@ -271,7 +268,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/invoice.Invoice"
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "400": {
@@ -499,47 +496,6 @@ const docTemplate = `{
                 },
                 "lifetime": {
                     "type": "integer"
-                }
-            }
-        },
-        "invoice.Invoice": {
-            "type": "object",
-            "properties": {
-                "amount": {
-                    "type": "number"
-                },
-                "callbackURL": {
-                    "type": "string"
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "expiredAt": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "overpayment": {
-                    "type": "number"
-                },
-                "paidByAddress": {
-                    "type": "string"
-                },
-                "payToAddress": {
-                    "type": "string"
-                },
-                "status": {
-                    "$ref": "#/definitions/invoice.Status"
-                },
-                "updatedAt": {
-                    "type": "string"
-                },
-                "userID": {
-                    "type": "string"
                 }
             }
         },

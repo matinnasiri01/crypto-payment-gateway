@@ -15,7 +15,6 @@ type Service struct {
 
 const defaultLifetime = 1800
 
-// todo override the errors or make pkg/errors to set and handle one time!
 var (
 	ErrLifetime      = fmt.Errorf("1800 < lifetime < 86400")
 	ErrNotFind       = fmt.Errorf("can`t find this invoice")
@@ -59,17 +58,17 @@ func (s *Service) Create(ctx context.Context, ID uuid.UUID, req *CreateRequest) 
 	return nil
 }
 
-func (s *Service) List(ctx context.Context, ID uuid.UUID, page, limit int) (*[]Invoice, error) {
+func (s *Service) List(ctx context.Context, ID uuid.UUID, page, limit int) (*ListResponse, error) {
 
 	list, err := s.repo.ListByUser(ctx, ID, Pagination{Page: page, Limit: limit})
 	if err != nil {
 		return nil, err
 	}
 
-	return list, nil
+	return &ListResponse{page, limit, len(*list), list}, nil
 }
 
-func (s *Service) GetByID(ctx context.Context, invoiceID, userID uuid.UUID) (*Invoice, error) {
+func (s *Service) GetByID(ctx context.Context, invoiceID, userID uuid.UUID) (*Response, error) {
 
 	res, err := s.repo.GetByID(ctx, invoiceID)
 	if err != nil {
@@ -79,7 +78,17 @@ func (s *Service) GetByID(ctx context.Context, invoiceID, userID uuid.UUID) (*In
 	if res.UserID != userID {
 		return nil, ErrNotFind
 	}
-	return res, nil
+	return &Response{
+		ID:            res.ID,
+		Status:        res.Status,
+		Amount:        res.Amount,
+		Description:   res.Description,
+		PayToAddress:  res.PayToAddress,
+		PaidByAddress: res.PaidByAddress,
+		Overpayment:   res.Overpayment,
+		CreatedAt:     res.CreatedAt,
+		ExpiredAt:     res.ExpiredAt,
+	}, nil
 }
 
 func (s *Service) GetForPay(ctx context.Context, invoiceID uuid.UUID) (*Response, error) {
