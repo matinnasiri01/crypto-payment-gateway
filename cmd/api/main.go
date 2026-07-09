@@ -63,7 +63,7 @@ func main() {
 	ih := invoice.NewHandler(is)
 
 	is.StartWatcher(context.Background())
-	is.StartWorker(context.Background())
+	go is.StartWorker(context.Background())
 
 	r := gin.Default()
 

@@ -14,6 +14,7 @@ type Repository interface {
 	Delete(ctx context.Context, invoiceID, userID uuid.UUID) error
 
 	GetPending(ctx context.Context) (*[]Invoice, error)
+	UpdateStatus(ctx context.Context, invoice *Invoice) error
 }
 
 type Pagination struct {

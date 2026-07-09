@@ -259,5 +259,73 @@ func (r *PostgresRepo) Delete(ctx context.Context, invoiceID, userID uuid.UUID) 
 }
 
 func (r *PostgresRepo) GetPending(ctx context.Context) (*[]Invoice, error) {
-	return nil, nil
+
+	query := `
+	SELECT
+		id,
+		user_id,
+		status,
+		expired_at
+	FROM invoices
+	WHERE status = 'pending'
+	ORDER BY created_at DESC
+	`
+
+	rows, err := r.pool.Query(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	invoices := make([]Invoice, 0)
+
+	for rows.Next() {
+
+		var invoice Invoice
+
+		err := rows.Scan(
+			&invoice.ID,
+			&invoice.UserID,
+			&invoice.Status,
+			&invoice.ExpiredAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		invoices = append(invoices, invoice)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return &invoices, nil
+}
+
+func (r *PostgresRepo) UpdateStatus(ctx context.Context, invoice *Invoice) error {
+
+	query := `
+	UPDATE invoices
+	SET
+		status = @status,
+		updated_at = NOW()
+	WHERE id = @id;
+	`
+
+	args := pgx.NamedArgs{
+		"status": invoice.Status,
+		"id":     invoice.ID,
+	}
+
+	cmd, err := r.pool.Exec(ctx, query, args)
+	if err != nil {
+		return err
+	}
+
+	if cmd.RowsAffected() == 0 {
+		return ErrInvoiceNotFound
+	}
+
+	return nil
 }

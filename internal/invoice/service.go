@@ -3,6 +3,7 @@ package invoice
 import (
 	"context"
 	"crypto-payment-gateway/internal/blockchain"
+	"log"
 
 	"fmt"
 	"time"
@@ -129,5 +130,26 @@ func (s *Service) StartWatcher(ctx context.Context) {
 }
 
 func (s *Service) StartWorker(ctx context.Context) {
+	log.Println("Invoice Worker is running!")
 
+	for {
+
+		inv, er := s.repo.GetPending(ctx)
+		if er != nil {
+			log.Fatal(er.Error())
+		}
+
+		for _, item := range *inv {
+
+			if item.IsExpired() {
+				item.Status = StatusExpired
+
+				if e := s.repo.UpdateStatus(ctx, &item); e != nil {
+					log.Fatal(e.Error())
+				}
+			}
+		}
+
+		time.Sleep(10 * time.Second)
+	}
 }
