@@ -10,7 +10,7 @@ import (
 type Blockchain interface {
 	ValidateAddress(address string) error
 
-	GenerateDepositAddress(ctx context.Context) (string, error)
+	GenerateDepositAddress(index uint32) (string, error)
 
 	Balance(ctx context.Context, address string) (decimal.Decimal, error)
 

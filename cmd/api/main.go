@@ -56,7 +56,7 @@ func main() {
 	})
 
 	// blockchain
-	chain := blockchain.NewTRC20(tn)
+	chain := blockchain.NewTRC20(tn, os.Getenv("MNEMONIC"))
 
 	// user
 	ur := user.NewPostgresRepo(pool.Pool)
