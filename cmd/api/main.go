@@ -51,7 +51,7 @@ func main() {
 	auth := middleware.NewAuth(jwtManager)
 
 	tn := tron.NewClient(tron.Config{
-		Network: tron.Mainnet,
+		Network: tron.Nila,
 		APIKey:  os.Getenv("TRON_GRID_APIKEY"),
 	})
 

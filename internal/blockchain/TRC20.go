@@ -12,8 +12,9 @@ type TRC20 struct {
 	client *tron.Client
 }
 
-func NewTRC20(client *tron.Client) *TRC20 {
-	return &TRC20{client: client}
+func NewTRC20(cli *tron.Client) *TRC20 {
+
+	return &TRC20{client: cli}
 }
 
 func (t *TRC20) ValidateAddress(address string) error {
@@ -33,8 +34,7 @@ func (t *TRC20) ValidateAddress(address string) error {
 func (t *TRC20) GenerateDepositAddress(ctx context.Context) (string, error) { return "", nil }
 
 func (t *TRC20) Balance(ctx context.Context, address string) (decimal.Decimal, error) {
-
-	return decimal.Zero, nil
+	return t.client.GetBalance(ctx, []byte(address))
 }
 
 func (t *TRC20) Transfer(ctx context.Context, to string, amount decimal.Decimal) (string, error) {
