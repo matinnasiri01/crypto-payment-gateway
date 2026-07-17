@@ -39,7 +39,6 @@ func (t *TRC20) ValidateAddress(address string) error {
 }
 
 func (t *TRC20) GenerateDepositAddress(index uint32) (string, error) {
-
 	derive, err := t.wallet.Derive(index)
 	if err != nil {
 		return "", err

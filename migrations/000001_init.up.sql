@@ -40,3 +40,5 @@ CREATE INDEX IF NOT EXISTS idx_invoices_status_expired
 
 CREATE INDEX IF NOT EXISTS idx_invoices_address_status
     ON invoices (pay_to_address, status);
+
+CREATE INDEX IF NOT EXISTS idx_invoices_hd_index ON invoices (hd_index DESC);

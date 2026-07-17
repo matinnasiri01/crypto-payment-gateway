@@ -25,9 +25,10 @@ var (
 	ErrInvalidAmount = fmt.Errorf("amount error")
 )
 
-func NewService(r Repository) *Service {
+func NewService(r Repository, c blockchain.Blockchain) *Service {
 	return &Service{
-		repo: r,
+		repo:  r,
+		chain: c,
 	}
 }
 
@@ -45,12 +46,26 @@ func (s *Service) Create(ctx context.Context, ID uuid.UUID, req *CreateRequest) 
 		return ErrInvalidAmount
 	}
 
+	// todo mutex!
+	index, ier := s.repo.GetLastIndex(ctx)
+	if ier != nil {
+		return ier
+	}
+	index += 1
+
+	add, der := s.chain.GenerateDepositAddress(index)
+	if der != nil {
+		return der
+	}
+
 	invo := &Invoice{
-		UserID:      ID,
-		Amount:      req.Amount,
-		Description: req.Description,
-		CallbackURL: req.CallbackURL,
-		ExpiredAt:   time.Now().Add(time.Duration(lifetime) * time.Second),
+		UserID:       ID,
+		HDIndex:      index,
+		PayToAddress: add,
+		Amount:       req.Amount,
+		Description:  req.Description,
+		CallbackURL:  req.CallbackURL,
+		ExpiredAt:    time.Now().Add(time.Duration(lifetime) * time.Second),
 	}
 
 	invo.BeforeCreate()

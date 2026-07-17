@@ -15,6 +15,7 @@ type Repository interface {
 
 	GetPending(ctx context.Context) (*[]Invoice, error)
 	UpdateStatus(ctx context.Context, invoice *Invoice) error
+	GetLastIndex(ctx context.Context) (uint32, error)
 }
 
 type Pagination struct {

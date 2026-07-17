@@ -29,6 +29,7 @@ func (r *PostgresRepo) Create(ctx context.Context, invoice *Invoice) error {
 	INSERT INTO invoices (
 		id,
 		user_id,
+	    hd_index,           
 		status,
 		amount,
 		description,
@@ -43,6 +44,7 @@ func (r *PostgresRepo) Create(ctx context.Context, invoice *Invoice) error {
 	VALUES (
 		@id,
 		@user_id,
+	    @hd_index,
 		@status,
 		@amount,
 		@description,
@@ -59,6 +61,7 @@ func (r *PostgresRepo) Create(ctx context.Context, invoice *Invoice) error {
 		args := pgx.NamedArgs{
 			"id":              invoice.ID,
 			"user_id":         invoice.UserID,
+			"hd_index":        invoice.HDIndex,
 			"status":          invoice.Status,
 			"amount":          invoice.Amount,
 			"description":     invoice.Description,
@@ -328,4 +331,15 @@ func (r *PostgresRepo) UpdateStatus(ctx context.Context, invoice *Invoice) error
 	}
 
 	return nil
+}
+
+func (r *PostgresRepo) GetLastIndex(ctx context.Context) (uint32, error) {
+	var lastIndex int
+	query := `SELECT COALESCE(MAX(hd_index), 0) FROM invoices`
+	err := r.pool.QueryRow(ctx, query).Scan(&lastIndex)
+	if err != nil {
+		return 0, err
+	}
+
+	return uint32(lastIndex), nil
 }

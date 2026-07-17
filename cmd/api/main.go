@@ -65,7 +65,7 @@ func main() {
 
 	// invoice
 	ir := invoice.NewPostgresRepo(pool.Pool)
-	is := invoice.NewService(ir)
+	is := invoice.NewService(ir, chain)
 	ih := invoice.NewHandler(is)
 
 	is.StartWatcher(context.Background())

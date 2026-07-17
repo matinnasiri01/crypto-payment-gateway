@@ -44,6 +44,12 @@ func (ser Service) Signup(ctx context.Context, req *SignupRequest) error {
 		return ErrPasswordHashing
 	}
 
+	if req.Wallet != "" {
+		if err := ser.chain.ValidateAddress(req.Wallet); err != nil {
+			return err
+		}
+	}
+
 	user := &User{
 		Email:           req.Email,
 		PasswordHash:    hash,
@@ -73,6 +79,10 @@ func (ser Service) Login(ctx context.Context, req *LoginRequest) (*User, error) 
 }
 
 func (ser Service) Update(ctx context.Context, ID uuid.UUID, req *UpdateRequest) error {
+
+	if err := ser.chain.ValidateAddress(req.Wallet); err != nil {
+		return err
+	}
 
 	return ser.repo.Update(ctx, &User{
 		ID:              ID,

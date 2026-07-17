@@ -21,6 +21,7 @@ type Invoice struct {
 	ID     uuid.UUID
 	UserID uuid.UUID
 
+	HDIndex     uint32
 	Status      Status
 	Amount      decimal.Decimal
 	Overpayment decimal.Decimal

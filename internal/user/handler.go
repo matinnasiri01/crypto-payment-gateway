@@ -56,8 +56,6 @@ func (h *Handler) Signup(c *gin.Context) {
 		return
 	}
 
-	// todo: Check Wallet Address
-
 	e := h.userService.Signup(c.Request.Context(), &sr)
 	if e != nil {
 		c.JSON(http.StatusConflict, response.Error(e.Error()))
