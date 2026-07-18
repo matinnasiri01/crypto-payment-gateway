@@ -68,8 +68,8 @@ func main() {
 	is := invoice.NewService(ir, chain)
 	ih := invoice.NewHandler(is)
 
-	is.StartWatcher(context.Background())
-	go is.StartWorker(context.Background())
+	go is.StartWatcher(context.Background())
+	//go is.StartWorker(context.Background())
 
 	r := gin.Default()
 

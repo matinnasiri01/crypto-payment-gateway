@@ -30,7 +30,7 @@ func NewClient(cfg Config) *Client {
 	}, cfg: cfg}
 }
 
-func (c *Client) Raw(ctx context.Context, method, path string, by io.Reader) ([]byte, error) {
+func (c *Client) raw(ctx context.Context, method, path string, by io.Reader) ([]byte, error) {
 
 	req, err := http.NewRequestWithContext(ctx, method, string(c.cfg.Network)+path, by)
 	if err != nil {
@@ -64,7 +64,10 @@ func (c *Client) GetBalance(ctx context.Context, address Address) (decimal.Decim
 
 	path := fmt.Sprintf("/v1/accounts/%s/trc20/balance?contract_address=%s", address, NileUSDTContract)
 
-	body, _ := c.Raw(ctx, http.MethodGet, path, nil)
+	body, rawErr := c.raw(ctx, http.MethodGet, path, nil)
+	if rawErr != nil {
+		return decimal.Zero, rawErr
+	}
 
 	var ac AccountResponse
 	err := json.Unmarshal(body, &ac)
@@ -74,11 +77,18 @@ func (c *Client) GetBalance(ctx context.Context, address Address) (decimal.Decim
 
 	des := decimal.Zero
 	if ac.Success {
-		usdt, err := decimal.NewFromString(ac.Data[0][NileUSDTContract])
-		if err != nil {
-			return decimal.Zero, err
+		for key, value := range ac.Data[0] {
+			if key == NileUSDTContract {
+
+				usdt, uErr := decimal.NewFromString(value)
+				if uErr != nil {
+					return decimal.Zero, uErr
+				}
+				des = usdt.Shift(-6)
+			}
+
 		}
-		des = usdt.Shift(-6)
+
 	}
 	return des, nil
 }
@@ -86,9 +96,11 @@ func (c *Client) GetBalance(ctx context.Context, address Address) (decimal.Decim
 func (c *Client) Transactions(ctx context.Context, address Address, minTimestamp int64) (TransResponse, error) {
 
 	path := fmt.Sprintf("/v1/accounts/%s/transactions/trc20?only_confirmed=true&only_to=true&contract_address=%s&min_timestamp=%d", address, NileUSDTContract, minTimestamp)
-	body, _ := c.Raw(ctx, http.MethodGet, path, nil)
 
-	//fmt.Println(string(body))
+	body, rawErr := c.raw(ctx, http.MethodGet, path, nil)
+	if rawErr != nil {
+		return TransResponse{}, rawErr
+	}
 
 	var tr TransResponse
 	err := json.Unmarshal(body, &tr)

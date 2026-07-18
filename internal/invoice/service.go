@@ -140,8 +140,45 @@ func (s *Service) Update(ctx context.Context, ID uuid.UUID, req *UpdateRequest) 
 	})
 }
 
+// MVP design:
 func (s *Service) StartWatcher(ctx context.Context) {
+	log.Println("Invoice Watcher is running!")
 
+	ticker := time.NewTicker(5 * time.Second)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		pending, err := s.repo.GetPending(ctx)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		for _, inv := range *pending {
+			balance, err := s.chain.Balance(ctx, inv.PayToAddress)
+			if err != nil {
+				log.Fatal(err, inv.PayToAddress)
+			}
+
+			if balance.GreaterThanOrEqual(inv.Amount) {
+				inv.Status = StatusPaid
+				inv.Overpayment = balance.Sub(inv.Amount)
+
+				transactions, tErr := s.chain.Transactions(ctx, inv.PayToAddress, inv.CreatedAt)
+				if tErr != nil {
+					log.Fatal(tErr)
+				}
+				inv.PaidByAddress = transactions[0].Sender
+
+				err := s.repo.Update(ctx, &inv)
+				if err != nil {
+					log.Fatal(err)
+				}
+				break
+
+			}
+		}
+	}
 }
 
 func (s *Service) StartWorker(ctx context.Context) {

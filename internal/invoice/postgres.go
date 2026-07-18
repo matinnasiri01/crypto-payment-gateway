@@ -88,7 +88,10 @@ func (r *PostgresRepo) Update(ctx context.Context, invoice *Invoice) error {
 
 	query := `
 	UPDATE invoices
-	SET
+	SET         
+		status = @status,
+		paid_by_address = @paid_by_address,
+		overpayment = @overpayment,
 		amount = @amount,
 		description = @description,
 		updated_at = NOW()
@@ -98,10 +101,13 @@ func (r *PostgresRepo) Update(ctx context.Context, invoice *Invoice) error {
 	`
 
 	args := pgx.NamedArgs{
-		"id":          invoice.ID,
-		"user_id":     invoice.UserID,
-		"amount":      invoice.Amount,
-		"description": invoice.Description,
+		"id":              invoice.ID,
+		"status":          invoice.Status,
+		"user_id":         invoice.UserID,
+		"amount":          invoice.Amount,
+		"paid_by_address": invoice.PaidByAddress,
+		"overpayment":     invoice.Overpayment,
+		"description":     invoice.Description,
 	}
 
 	cmd, err := r.pool.Exec(ctx, query, args)
@@ -267,6 +273,8 @@ func (r *PostgresRepo) GetPending(ctx context.Context) (*[]Invoice, error) {
 	SELECT
 		id,
 		user_id,
+		pay_to_address,
+		amount,
 		status,
 		expired_at
 	FROM invoices
@@ -289,6 +297,8 @@ func (r *PostgresRepo) GetPending(ctx context.Context) (*[]Invoice, error) {
 		err := rows.Scan(
 			&invoice.ID,
 			&invoice.UserID,
+			&invoice.PayToAddress,
+			&invoice.Amount,
 			&invoice.Status,
 			&invoice.ExpiredAt,
 		)
