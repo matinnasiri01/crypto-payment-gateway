@@ -55,8 +55,32 @@ func (t *TRC20) Transfer(ctx context.Context, to string, amount decimal.Decimal)
 	return "", nil
 }
 
-func (t *TRC20) Transactions(ctx context.Context, address string, from time.Time) ([]Transaction, error) {
-	return nil, nil
+func (t *TRC20) Transactions(ctx context.Context, address string, after time.Time) ([]Transaction, error) {
+
+	var trans []Transaction
+
+	data, tronError := t.client.Transactions(ctx, []byte(address), after.UnixMilli())
+	if tronError != nil {
+		return nil, tronError
+	}
+
+	if data.Success {
+		for _, d := range data.Data {
+			value, err := decimal.NewFromString(d.Value)
+			if err != nil {
+				return nil, err
+			}
+
+			trans = append(trans, Transaction{
+				Hash:      d.TransactionId,
+				Sender:    d.From,
+				Receiver:  d.To,
+				Amount:    value.Shift(-6),
+				Timestamp: time.UnixMilli(d.BlockTimestamp),
+			})
+		}
+	}
+	return trans, nil
 }
 
 func (t *TRC20) TransactionByHash(ctx context.Context, hash string) (*Transaction, error) {
