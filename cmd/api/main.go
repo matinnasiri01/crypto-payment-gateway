@@ -21,7 +21,6 @@ import (
 	"crypto-payment-gateway/internal/user"
 	"crypto-payment-gateway/pkg/database"
 	"crypto-payment-gateway/pkg/jwt"
-	"crypto-payment-gateway/pkg/tron"
 	"log"
 	"net/http"
 	"os"
@@ -50,13 +49,8 @@ func main() {
 	jwtManager := jwt.New(os.Getenv("JWT_SECRET"))
 	auth := middleware.NewAuth(jwtManager)
 
-	tn := tron.NewClient(tron.Config{
-		Network: tron.Nila,
-		APIKey:  os.Getenv("TRON_GRID_APIKEY"),
-	})
-
 	// blockchain
-	chain := blockchain.NewTRC20(tn, os.Getenv("MNEMONIC"))
+	chain := blockchain.NewTRC20(os.Getenv("MNEMONIC"))
 
 	// user
 	ur := user.NewPostgresRepo(pool.Pool)
@@ -69,7 +63,7 @@ func main() {
 	ih := invoice.NewHandler(is)
 
 	go is.StartWatcher(context.Background())
-	//go is.StartWorker(context.Background())
+	go is.StartWorker(context.Background())
 
 	r := gin.Default()
 
