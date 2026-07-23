@@ -53,7 +53,7 @@ func main() {
 	wallet := wallet2.New(os.Getenv("MNEMONIC"))
 
 	// blockchain
-	chain := blockchain.NewTRC20(&blockchain.Nile)
+	chain := blockchain.NewTRC20(&blockchain.Nile, os.Getenv("TRON_GRID_APIKEY"))
 
 	// user
 	ur := user.NewPostgresRepo(pool.Pool)

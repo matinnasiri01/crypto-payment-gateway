@@ -19,26 +19,30 @@ import (
 
 type TRC20 struct {
 	network *Network
-	client  *client.GrpcClient
+	grpc    *client.GrpcClient
+	http    *Client
 	token   *trc20.Token
 }
 
 var Nile = Network{
-	Endpoint: "grpc.nile.trongrid.io:50051",
-	Contract: "TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf",
-	FeeLimit: 100_000_000,
+	GEndpoint: "grpc.nile.trongrid.io:50051",
+	HEndpoint: "https://nile.trongrid.io",
+	Contract:  "TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf",
+	FeeLimit:  100_000_000,
 }
 
-func NewTRC20(network *Network) *TRC20 {
+func NewTRC20(network *Network, api string) *TRC20 {
 
-	conn := client.NewGrpcClient(network.Endpoint)
+	conn := client.NewGrpcClient(network.GEndpoint)
 	if err := conn.Start(grpc.WithTransportCredentials(insecure.NewCredentials())); err != nil {
 		logger.Fatal(os.Stderr, "connect error: %v\n", err)
 	}
 
+	hCli := NewClient(Config{Network: *network, APIKey: api})
+
 	token := trc20.New(conn, network.Contract)
 
-	return &TRC20{network: network, client: conn, token: token}
+	return &TRC20{network: network, grpc: conn, http: hCli, token: token}
 }
 
 func (t *TRC20) IsValidateAddress(address string) bool {
@@ -99,6 +103,5 @@ func (t *TRC20) newSigner(privateKey string) (signer.Signer, error) {
 }
 
 func (t *TRC20) Transactions(ctx context.Context, address string, after time.Time) ([]Transaction, error) {
-
-	return nil, nil
+	return t.http.Transactions(ctx, address, after.UnixMilli())
 }
