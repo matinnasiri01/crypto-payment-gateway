@@ -15,17 +15,17 @@ package main
 
 import (
 	"context"
+	"crypto-payment-gateway/docs"
 	"crypto-payment-gateway/internal/blockchain"
 	"crypto-payment-gateway/internal/invoice"
 	"crypto-payment-gateway/internal/middleware"
 	"crypto-payment-gateway/internal/user"
+	wallet2 "crypto-payment-gateway/internal/wallet"
 	"crypto-payment-gateway/pkg/database"
 	"crypto-payment-gateway/pkg/jwt"
 	"log"
 	"net/http"
 	"os"
-
-	"crypto-payment-gateway/docs"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -49,8 +49,11 @@ func main() {
 	jwtManager := jwt.New(os.Getenv("JWT_SECRET"))
 	auth := middleware.NewAuth(jwtManager)
 
+	// wallet
+	wallet := wallet2.New(os.Getenv("MNEMONIC"))
+
 	// blockchain
-	chain := blockchain.NewTRC20(os.Getenv("MNEMONIC"))
+	chain := blockchain.NewTRC20(&blockchain.Nile)
 
 	// user
 	ur := user.NewPostgresRepo(pool.Pool)
@@ -59,7 +62,7 @@ func main() {
 
 	// invoice
 	ir := invoice.NewPostgresRepo(pool.Pool)
-	is := invoice.NewService(ir, chain)
+	is := invoice.NewService(ir, chain, wallet)
 	ih := invoice.NewHandler(is)
 
 	go is.StartWatcher(context.Background())

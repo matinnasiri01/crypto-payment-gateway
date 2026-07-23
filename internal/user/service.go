@@ -18,8 +18,9 @@ var (
 	ErrEmailAlreadyExists = fmt.Errorf("email exists")
 	ErrUserNotExists      = fmt.Errorf("user not exists")
 
-	ErrWrongPassword   = fmt.Errorf("wrong password")
-	ErrPasswordHashing = fmt.Errorf("problem with password encryption")
+	ErrWrongPassword        = fmt.Errorf("wrong password")
+	ErrInvalidWalletAddress = fmt.Errorf("invalid wallet address")
+	ErrPasswordHashing      = fmt.Errorf("problem with password encryption")
 )
 
 func NewService(r Repository, b blockchain.Blockchain) *Service {
@@ -45,8 +46,8 @@ func (ser Service) Signup(ctx context.Context, req *SignupRequest) error {
 	}
 
 	if req.Wallet != "" {
-		if err := ser.chain.ValidateAddress(req.Wallet); err != nil {
-			return err
+		if err := ser.chain.IsValidateAddress(req.Wallet); err != true {
+			return ErrInvalidWalletAddress
 		}
 	}
 
@@ -80,8 +81,8 @@ func (ser Service) Login(ctx context.Context, req *LoginRequest) (*User, error) 
 
 func (ser Service) Update(ctx context.Context, ID uuid.UUID, req *UpdateRequest) error {
 
-	if err := ser.chain.ValidateAddress(req.Wallet); err != nil {
-		return err
+	if err := ser.chain.IsValidateAddress(req.Wallet); err != true {
+		return ErrInvalidWalletAddress
 	}
 
 	return ser.repo.Update(ctx, &User{

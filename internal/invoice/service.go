@@ -3,6 +3,7 @@ package invoice
 import (
 	"context"
 	"crypto-payment-gateway/internal/blockchain"
+	"crypto-payment-gateway/internal/wallet"
 	"log"
 
 	"fmt"
@@ -13,8 +14,9 @@ import (
 )
 
 type Service struct {
-	repo  Repository
-	chain blockchain.Blockchain
+	repo   Repository
+	chain  blockchain.Blockchain
+	wallet wallet.Wallet
 }
 
 const defaultLifetime = 1800
@@ -25,10 +27,11 @@ var (
 	ErrInvalidAmount = fmt.Errorf("amount error")
 )
 
-func NewService(r Repository, c blockchain.Blockchain) *Service {
+func NewService(r Repository, c blockchain.Blockchain, w wallet.Wallet) *Service {
 	return &Service{
-		repo:  r,
-		chain: c,
+		repo:   r,
+		chain:  c,
+		wallet: w,
 	}
 }
 
@@ -53,7 +56,7 @@ func (s *Service) Create(ctx context.Context, ID uuid.UUID, req *CreateRequest) 
 	}
 	index += 1
 
-	add, der := s.chain.GenerateDepositAddress(index)
+	add, der := s.wallet.Address(index)
 	if der != nil {
 		return der
 	}
