@@ -91,6 +91,7 @@ func (r *PostgresRepo) Update(ctx context.Context, invoice *Invoice) error {
 	SET         
 		status = @status,
 		paid_by_address = @paid_by_address,
+		transaction_id = @transaction_id,
 		overpayment = @overpayment,
 		amount = @amount,
 		description = @description,
@@ -106,6 +107,7 @@ func (r *PostgresRepo) Update(ctx context.Context, invoice *Invoice) error {
 		"user_id":         invoice.UserID,
 		"amount":          invoice.Amount,
 		"paid_by_address": invoice.PaidByAddress,
+		"transaction_id":  invoice.TransactionID,
 		"overpayment":     invoice.Overpayment,
 		"description":     invoice.Description,
 	}
@@ -182,6 +184,7 @@ func (r *PostgresRepo) ListByUser(ctx context.Context, userID uuid.UUID, p Pagin
 		callback_url,
 		pay_to_address,
 		paid_by_address,
+		transaction_id,
 		overpayment,
 		created_at,
 		updated_at,
@@ -220,6 +223,7 @@ func (r *PostgresRepo) ListByUser(ctx context.Context, userID uuid.UUID, p Pagin
 			&invoice.CallbackURL,
 			&invoice.PayToAddress,
 			&invoice.PaidByAddress,
+			&invoice.TransactionID,
 			&invoice.Overpayment,
 			&invoice.CreatedAt,
 			&invoice.UpdatedAt,

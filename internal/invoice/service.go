@@ -143,6 +143,7 @@ func (s *Service) Update(ctx context.Context, ID uuid.UUID, req *UpdateRequest) 
 	})
 }
 
+// Watcher
 func (s *Service) StartWatcher(ctx context.Context) {
 	log.Println("Invoice Watcher is running!")
 
@@ -163,7 +164,8 @@ func (s *Service) StartWatcher(ctx context.Context) {
 				func(t *blockchain.Transaction) {
 
 					item.Status = StatusPaid
-					item.PaidByAddress = t.Hash
+					item.PaidByAddress = t.Sender
+					item.TransactionID = t.Hash
 
 					err := s.repo.Update(ctx, &item)
 					if err != nil {
@@ -171,16 +173,19 @@ func (s *Service) StartWatcher(ctx context.Context) {
 					}
 				},
 				func(t *[]blockchain.Transaction, over decimal.Decimal) {
-					item.Status = StatusPaid
+					item.Status = StatusOverPaid
 					item.Overpayment = over
 
+					var txIDs string
+					for _, txId := range *t {
+						txIDs = fmt.Sprintf(txIDs, ",", txId)
+					}
+
+					item.TransactionID = txIDs
 					err := s.repo.Update(ctx, &item)
 					if err != nil {
 						return
 					}
-				},
-				func(t *[]blockchain.Transaction, under decimal.Decimal) {
-					// expire check system
 				})
 		}
 	}
@@ -191,8 +196,12 @@ func (s *Service) scanTransactions(
 	invoice *Invoice,
 	isEqual func(t *blockchain.Transaction),
 	isOver func(t *[]blockchain.Transaction, over decimal.Decimal),
-	isUnder func(t *[]blockchain.Transaction, under decimal.Decimal),
 ) {
+	currentValue, err := s.chain.Balance(ctx, invoice.PayToAddress)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
 	transactions, err := s.chain.Transactions(ctx, invoice.PayToAddress, invoice.CreatedAt)
 	if err != nil {
@@ -214,17 +223,13 @@ func (s *Service) scanTransactions(
 		target.Add(trans.Amount)
 	}
 
-	if target.GreaterThanOrEqual(invoice.Amount) {
+	if target.GreaterThan(invoice.Amount) && currentValue.GreaterThanOrEqual(invoice.Amount) {
 		isOver(&transactions, target)
 		return
 	}
-	if target.LessThanOrEqual(invoice.Amount) {
-		isUnder(&transactions, target)
-		return
-	}
-
 }
 
+// Worker
 func (s *Service) StartWorker(ctx context.Context) {
 	log.Println("Invoice Worker is running!")
 

@@ -12,7 +12,8 @@ type Status string
 const (
 	StatusPending   Status = "pending"
 	StatusPaid      Status = "paid"
-	StatusCancelled Status = "cancelled"
+	StatusUnderPaid        = "under_paid"
+	StatusOverPaid         = "over_paid"
 	StatusExpired   Status = "expired"
 	StatusDeleted   Status = "deleted"
 )
@@ -31,6 +32,7 @@ type Invoice struct {
 
 	PayToAddress  string
 	PaidByAddress string
+	TransactionID string
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
