@@ -77,6 +77,9 @@ func main() {
 	api := r.Group("/api/v1")
 	docs.SwaggerInfo.BasePath = "/api/v1"
 
+	// rate limit burst: 4 for test!
+	api.Use(middleware.RateLimiter(4))
+
 	uh.Register(api, auth)
 	ih.Register(api, auth)
 
