@@ -1,4 +1,4 @@
-module crypto-payment-gateway
+module github.com/matinnasiri01/gcpg
 
 go 1.25.0
 

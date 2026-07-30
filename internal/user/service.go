@@ -2,9 +2,9 @@ package user
 
 import (
 	"context"
-	"crypto-payment-gateway/internal/blockchain"
-	"crypto-payment-gateway/pkg/password"
 	"fmt"
+	"github.com/matinnasiri01/gcpg/internal/blockchain"
+	"github.com/matinnasiri01/gcpg/pkg/password"
 
 	"github.com/google/uuid"
 )

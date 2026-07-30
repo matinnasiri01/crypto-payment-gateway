@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"crypto-payment-gateway/pkg/response"
+	"github.com/matinnasiri01/gcpg/pkg/response"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

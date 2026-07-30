@@ -1,8 +1,8 @@
 package invoice
 
 import (
-	"crypto-payment-gateway/internal/middleware"
-	"crypto-payment-gateway/pkg/response"
+	"github.com/matinnasiri01/gcpg/internal/middleware"
+	"github.com/matinnasiri01/gcpg/pkg/response"
 	"net/http"
 	"strconv"
 

@@ -15,17 +15,18 @@ package main
 
 import (
 	"context"
-	"crypto-payment-gateway/docs"
-	"crypto-payment-gateway/internal/blockchain"
-	"crypto-payment-gateway/internal/invoice"
-	"crypto-payment-gateway/internal/middleware"
-	"crypto-payment-gateway/internal/user"
-	wallet2 "crypto-payment-gateway/internal/wallet"
-	"crypto-payment-gateway/pkg/database"
-	"crypto-payment-gateway/pkg/jwt"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/matinnasiri01/gcpg/docs"
+	"github.com/matinnasiri01/gcpg/internal/blockchain"
+	"github.com/matinnasiri01/gcpg/internal/invoice"
+	"github.com/matinnasiri01/gcpg/internal/middleware"
+	"github.com/matinnasiri01/gcpg/internal/user"
+	wallet2 "github.com/matinnasiri01/gcpg/internal/wallet"
+	"github.com/matinnasiri01/gcpg/pkg/database"
+	"github.com/matinnasiri01/gcpg/pkg/jwt"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"

@@ -2,8 +2,8 @@ package invoice
 
 import (
 	"context"
-	"crypto-payment-gateway/internal/blockchain"
-	"crypto-payment-gateway/internal/wallet"
+	"github.com/matinnasiri01/gcpg/internal/blockchain"
+	"github.com/matinnasiri01/gcpg/internal/wallet"
 	"log"
 
 	"fmt"
@@ -49,7 +49,6 @@ func (s *Service) Create(ctx context.Context, ID uuid.UUID, req *CreateRequest) 
 		return ErrInvalidAmount
 	}
 
-	// todo mutex!
 	index, ier := s.repo.GetLastIndex(ctx)
 	if ier != nil {
 		return ier
@@ -202,6 +201,7 @@ func (s *Service) scanTransactions(
 		log.Println(err)
 		return
 	}
+	log.Println(invoice.ID, currentValue.String())
 
 	transactions, err := s.chain.Transactions(ctx, invoice.PayToAddress, invoice.CreatedAt)
 	if err != nil {
@@ -210,6 +210,7 @@ func (s *Service) scanTransactions(
 	}
 
 	if len(transactions) == 0 {
+		log.Println("not yet")
 		return
 
 	}
@@ -223,7 +224,7 @@ func (s *Service) scanTransactions(
 		target.Add(trans.Amount)
 	}
 
-	if target.GreaterThan(invoice.Amount) && currentValue.GreaterThanOrEqual(invoice.Amount) {
+	if target.GreaterThan(invoice.Amount) {
 		isOver(&transactions, target)
 		return
 	}
